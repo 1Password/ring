@@ -1,0 +1,4 @@
+[toolchain]
+# Cargo 0.60 pretty prints the `Cargo.toml` and causes additional deltas when releasing
+channel = "1.59.0"
+components = ["clippy", "rustfmt"]
