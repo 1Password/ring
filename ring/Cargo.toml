@@ -59,9 +59,15 @@ slow_tests = []
 std = ["alloc"]
 test_logging = []
 wasm32_c = []
+[target."cfg(all(target_arch = \"wasm32\", target_vendor = \"unknown\", target_os = \"unknown\", target_env = \"\"))".dependencies.js-sys]
+version = "0.3.51"
+
+[target."cfg(all(target_arch = \"wasm32\", target_vendor = \"unknown\", target_os = \"unknown\", target_env = \"\"))".dependencies.wasm-bindgen]
+version = "0.2.80"
+
 [target."cfg(all(target_arch = \"wasm32\", target_vendor = \"unknown\", target_os = \"unknown\", target_env = \"\"))".dependencies.web-sys]
-version = "0.3.37"
-features = ["Crypto", "Window"]
+version = "0.3.51"
+features = ["Crypto", "Window", "ServiceWorkerGlobalScope"]
 default-features = false
 [target."cfg(any(target_arch = \"x86\",target_arch = \"x86_64\", all(any(target_arch = \"aarch64\", target_arch = \"arm\"), any(target_os = \"android\", target_os = \"fuchsia\", target_os = \"linux\"))))".dependencies.spin]
 version = "0.5.2"
