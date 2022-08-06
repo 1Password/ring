@@ -282,10 +282,7 @@ pub use crate::rsa::{
     padding::{
         RsaEncoding,
 
-        // `RSA_PKCS1_SHA1` is intentionally not exposed. At a minimum, we'd need
-        // to create test vectors for signing with it, which we don't currently
-        // have. But, it's a bad idea to use SHA-1 anyway, so perhaps we just won't
-        // ever expose it.
+        RSA_PKCS1_SHA1_FOR_LEGACY_USE_ONLY,
         RSA_PKCS1_SHA256,
         RSA_PKCS1_SHA384,
         RSA_PKCS1_SHA512,
