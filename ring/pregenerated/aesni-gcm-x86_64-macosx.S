@@ -8,7 +8,6 @@
 #endif
 
 #if defined(__x86_64__) && !defined(OPENSSL_NO_ASM)
-#include "ring_core_generated/prefix_symbols_asm.h"
 .text	
 
 
@@ -341,11 +340,11 @@ L$6x_done:
 	.byte	0xf3,0xc3
 
 
-.globl	_aesni_gcm_decrypt
-.private_extern _aesni_gcm_decrypt
+.globl	_GFp_aesni_gcm_decrypt
+.private_extern _GFp_aesni_gcm_decrypt
 
 .p2align	5
-_aesni_gcm_decrypt:
+_GFp_aesni_gcm_decrypt:
 
 	xorq	%r10,%r10
 
@@ -548,11 +547,11 @@ L$handle_ctr32_2:
 
 
 
-.globl	_aesni_gcm_encrypt
-.private_extern _aesni_gcm_encrypt
+.globl	_GFp_aesni_gcm_encrypt
+.private_extern _GFp_aesni_gcm_encrypt
 
 .p2align	5
-_aesni_gcm_encrypt:
+_GFp_aesni_gcm_encrypt:
 
 	xorq	%r10,%r10
 

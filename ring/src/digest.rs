@@ -24,10 +24,9 @@
 // The goal for this implementation is to drive the overhead as close to zero
 // as possible.
 
-use crate::polyfill::array_map::Map;
 use crate::{
     c, cpu, debug,
-    endian::{ArrayEncoding, BigEndian},
+    endian::{self, BigEndian},
     polyfill,
 };
 use core::num::Wrapping;
@@ -64,9 +63,7 @@ impl BlockContext {
     pub(crate) fn update(&mut self, input: &[u8]) {
         let num_blocks = input.len() / self.algorithm.block_len;
         assert_eq!(num_blocks * self.algorithm.block_len, input.len());
-
         if num_blocks > 0 {
-            let _cpu_features = self.cpu_features;
             unsafe {
                 (self.algorithm.block_data_order)(&mut self.state, input.as_ptr(), num_blocks);
             }
@@ -251,7 +248,7 @@ impl AsRef<[u8]> for Digest {
     #[inline(always)]
     fn as_ref(&self) -> &[u8] {
         let as64 = unsafe { &self.value.as64 };
-        &as64.as_byte_array()[..self.algorithm.output_len]
+        &endian::as_byte_slice(as64)[..self.algorithm.output_len]
     }
 }
 
@@ -341,7 +338,7 @@ pub static SHA256: Algorithm = Algorithm {
     chaining_len: SHA256_OUTPUT_LEN,
     block_len: 512 / 8,
     len_len: 64 / 8,
-    block_data_order: sha2::sha256_block_data_order,
+    block_data_order: sha2::GFp_sha256_block_data_order,
     format_output: sha256_format_output,
     initial_state: State {
         as32: [
@@ -366,7 +363,7 @@ pub static SHA384: Algorithm = Algorithm {
     chaining_len: SHA512_OUTPUT_LEN,
     block_len: SHA512_BLOCK_LEN,
     len_len: SHA512_LEN_LEN,
-    block_data_order: sha2::sha512_block_data_order,
+    block_data_order: sha2::GFp_sha512_block_data_order,
     format_output: sha512_format_output,
     initial_state: State {
         as64: [
@@ -391,7 +388,7 @@ pub static SHA512: Algorithm = Algorithm {
     chaining_len: SHA512_OUTPUT_LEN,
     block_len: SHA512_BLOCK_LEN,
     len_len: SHA512_LEN_LEN,
-    block_data_order: sha2::sha512_block_data_order,
+    block_data_order: sha2::GFp_sha512_block_data_order,
     format_output: sha512_format_output,
     initial_state: State {
         as64: [
@@ -420,7 +417,7 @@ pub static SHA512_256: Algorithm = Algorithm {
     chaining_len: SHA512_OUTPUT_LEN,
     block_len: SHA512_BLOCK_LEN,
     len_len: SHA512_LEN_LEN,
-    block_data_order: sha2::sha512_block_data_order,
+    block_data_order: sha2::GFp_sha512_block_data_order,
     format_output: sha512_format_output,
     initial_state: State {
         as64: [
@@ -466,14 +463,32 @@ pub const MAX_CHAINING_LEN: usize = MAX_OUTPUT_LEN;
 fn sha256_format_output(input: State) -> Output {
     let input = unsafe { &input.as32 };
     Output {
-        as32: input.array_map(BigEndian::from),
+        as32: [
+            BigEndian::from(input[0]),
+            BigEndian::from(input[1]),
+            BigEndian::from(input[2]),
+            BigEndian::from(input[3]),
+            BigEndian::from(input[4]),
+            BigEndian::from(input[5]),
+            BigEndian::from(input[6]),
+            BigEndian::from(input[7]),
+        ],
     }
 }
 
 fn sha512_format_output(input: State) -> Output {
     let input = unsafe { &input.as64 };
     Output {
-        as64: input.array_map(BigEndian::from),
+        as64: [
+            BigEndian::from(input[0]),
+            BigEndian::from(input[1]),
+            BigEndian::from(input[2]),
+            BigEndian::from(input[3]),
+            BigEndian::from(input[4]),
+            BigEndian::from(input[5]),
+            BigEndian::from(input[6]),
+            BigEndian::from(input[7]),
+        ],
     }
 }
 

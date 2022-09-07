@@ -10,8 +10,7 @@
 
 #if !defined(OPENSSL_NO_ASM)
 #if defined(__arm__)
-#include "ring_core_generated/prefix_symbols_asm.h"
-#include <ring-core/arm_arch.h>
+#include <GFp/arm_arch.h>
 
 @ Silence ARMv8 deprecated IT instruction warnings. This file is used by both
 @ ARMv7 and ARMv8 processors and does not use ARMv8 instructions. (ARMv8 PMULL
@@ -33,11 +32,11 @@
 .arch	armv7-a
 .fpu	neon
 
-.globl	gcm_init_neon
-.hidden	gcm_init_neon
-.type	gcm_init_neon,%function
+.globl	GFp_gcm_init_neon
+.hidden	GFp_gcm_init_neon
+.type	GFp_gcm_init_neon,%function
 .align	4
-gcm_init_neon:
+GFp_gcm_init_neon:
 	vld1.64	d7,[r1]!		@ load H
 	vmov.i8	q8,#0xe1
 	vld1.64	d6,[r1]
@@ -53,13 +52,13 @@ gcm_init_neon:
 	vstmia	r0,{q3}
 
 	bx	lr					@ bx lr
-.size	gcm_init_neon,.-gcm_init_neon
+.size	GFp_gcm_init_neon,.-GFp_gcm_init_neon
 
-.globl	gcm_gmult_neon
-.hidden	gcm_gmult_neon
-.type	gcm_gmult_neon,%function
+.globl	GFp_gcm_gmult_neon
+.hidden	GFp_gcm_gmult_neon
+.type	GFp_gcm_gmult_neon,%function
 .align	4
-gcm_gmult_neon:
+GFp_gcm_gmult_neon:
 	vld1.64	d7,[r0]!		@ load Xi
 	vld1.64	d6,[r0]!
 	vmov.i64	d29,#0x0000ffffffffffff
@@ -72,13 +71,13 @@ gcm_gmult_neon:
 	veor	d28,d26,d27		@ Karatsuba pre-processing
 	mov	r3,#16
 	b	.Lgmult_neon
-.size	gcm_gmult_neon,.-gcm_gmult_neon
+.size	GFp_gcm_gmult_neon,.-GFp_gcm_gmult_neon
 
-.globl	gcm_ghash_neon
-.hidden	gcm_ghash_neon
-.type	gcm_ghash_neon,%function
+.globl	GFp_gcm_ghash_neon
+.hidden	GFp_gcm_ghash_neon
+.type	GFp_gcm_ghash_neon,%function
 .align	4
-gcm_ghash_neon:
+GFp_gcm_ghash_neon:
 	vld1.64	d1,[r0]!		@ load Xi
 	vld1.64	d0,[r0]!
 	vmov.i64	d29,#0x0000ffffffffffff
@@ -243,7 +242,7 @@ gcm_ghash_neon:
 	vst1.64	d0,[r0]
 
 	bx	lr					@ bx lr
-.size	gcm_ghash_neon,.-gcm_ghash_neon
+.size	GFp_gcm_ghash_neon,.-GFp_gcm_ghash_neon
 #endif
 .byte	71,72,65,83,72,32,102,111,114,32,65,82,77,118,52,47,78,69,79,78,44,32,67,82,89,80,84,79,71,65,77,83,32,98,121,32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46,111,114,103,62,0
 .align	2

@@ -40,7 +40,6 @@ pub static X25519: agreement::Algorithm = agreement::Algorithm {
     ecdh: x25519_ecdh,
 };
 
-#[allow(clippy::unnecessary_wraps)]
 fn x25519_check_private_key_bytes(bytes: &[u8]) -> Result<(), error::Unspecified> {
     debug_assert_eq!(bytes.len(), PRIVATE_KEY_LEN);
     Ok(())
@@ -77,14 +76,14 @@ fn x25519_public_from_private(
         }
     }
 
-    prefixed_extern! {
-        fn x25519_public_from_private_generic_masked(
+    extern "C" {
+        fn GFp_x25519_public_from_private_generic_masked(
             public_key_out: &mut PublicKey,
             private_key: &PrivateKey,
         );
     }
     unsafe {
-        x25519_public_from_private_generic_masked(public_out, &private_key);
+        GFp_x25519_public_from_private_generic_masked(public_out, &private_key);
     }
 
     Ok(())
@@ -117,15 +116,15 @@ fn x25519_ecdh(
             }
         }
 
-        prefixed_extern! {
-            fn x25519_scalar_mult_generic_masked(
+        extern "C" {
+            fn GFp_x25519_scalar_mult_generic_masked(
                 out: &mut ops::EncodedPoint,
                 scalar: &ops::MaskedScalar,
                 point: &ops::EncodedPoint,
             );
         }
         unsafe {
-            x25519_scalar_mult_generic_masked(out, scalar, point);
+            GFp_x25519_scalar_mult_generic_masked(out, scalar, point);
         }
     }
 
@@ -147,14 +146,14 @@ fn x25519_ecdh(
 
 #[cfg(all(not(target_os = "ios"), target_arch = "arm"))]
 fn x25519_neon(out: &mut ops::EncodedPoint, scalar: &ops::MaskedScalar, point: &ops::EncodedPoint) {
-    prefixed_extern! {
-        fn x25519_NEON(
+    extern "C" {
+        fn GFp_x25519_NEON(
             out: &mut ops::EncodedPoint,
             scalar: &ops::MaskedScalar,
             point: &ops::EncodedPoint,
         );
     }
-    unsafe { x25519_NEON(out, scalar, point) }
+    unsafe { GFp_x25519_NEON(out, scalar, point) }
 }
 
 const ELEM_AND_SCALAR_LEN: usize = ops::ELEM_LEN;

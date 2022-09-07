@@ -165,7 +165,7 @@ impl Ed25519KeyPair {
 
         let mut a = ExtPoint::new_at_infinity();
         unsafe {
-            x25519_ge_scalarmult_base(&mut a, &private_scalar);
+            GFp_x25519_ge_scalarmult_base(&mut a, &private_scalar);
         }
 
         Self {
@@ -178,8 +178,8 @@ impl Ed25519KeyPair {
     /// Returns the signature of the message `msg`.
     pub fn sign(&self, msg: &[u8]) -> signature::Signature {
         signature::Signature::new(|signature_bytes| {
-            prefixed_extern! {
-                fn x25519_sc_muladd(
+            extern "C" {
+                fn GFp_x25519_sc_muladd(
                     s: &mut [u8; SCALAR_LEN],
                     a: &Scalar,
                     b: &Scalar,
@@ -199,13 +199,13 @@ impl Ed25519KeyPair {
 
             let mut r = ExtPoint::new_at_infinity();
             unsafe {
-                x25519_ge_scalarmult_base(&mut r, &nonce);
+                GFp_x25519_ge_scalarmult_base(&mut r, &nonce);
             }
             signature_r.copy_from_slice(&r.into_encoded_point());
             let hram_digest = eddsa_digest(signature_r, &self.public_key.as_ref(), msg);
             let hram = Scalar::from_sha512_digest_reduced(hram_digest);
             unsafe {
-                x25519_sc_muladd(
+                GFp_x25519_sc_muladd(
                     signature_s.try_into().unwrap(),
                     &hram,
                     &self.private_scalar,
@@ -250,8 +250,8 @@ fn unwrap_pkcs8(
     Ok((private_key, public_key))
 }
 
-prefixed_extern! {
-    fn x25519_ge_scalarmult_base(h: &mut ExtPoint, a: &Scalar);
+extern "C" {
+    fn GFp_x25519_ge_scalarmult_base(h: &mut ExtPoint, a: &Scalar);
 }
 
 type Prefix = [u8; PREFIX_LEN];

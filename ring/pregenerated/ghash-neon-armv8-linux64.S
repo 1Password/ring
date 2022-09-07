@@ -10,16 +10,15 @@
 
 #if !defined(OPENSSL_NO_ASM)
 #if defined(__aarch64__)
-#include "ring_core_generated/prefix_symbols_asm.h"
-#include <ring-core/arm_arch.h>
+#include <GFp/arm_arch.h>
 
 .text
 
-.globl	gcm_init_neon
-.hidden	gcm_init_neon
-.type	gcm_init_neon,%function
+.globl	GFp_gcm_init_neon
+.hidden	GFp_gcm_init_neon
+.type	GFp_gcm_init_neon,%function
 .align	4
-gcm_init_neon:
+GFp_gcm_init_neon:
 	AARCH64_VALID_CALL_TARGET
 	// This function is adapted from gcm_init_v8. xC2 is t3.
 	ld1	{v17.2d}, [x1]			// load H
@@ -39,13 +38,13 @@ gcm_init_neon:
 	eor	v5.16b, v3.16b, v16.16b	// twisted H
 	st1	{v5.2d}, [x0]			// store Htable[0]
 	ret
-.size	gcm_init_neon,.-gcm_init_neon
+.size	GFp_gcm_init_neon,.-GFp_gcm_init_neon
 
-.globl	gcm_gmult_neon
-.hidden	gcm_gmult_neon
-.type	gcm_gmult_neon,%function
+.globl	GFp_gcm_gmult_neon
+.hidden	GFp_gcm_gmult_neon
+.type	GFp_gcm_gmult_neon,%function
 .align	4
-gcm_gmult_neon:
+GFp_gcm_gmult_neon:
 	AARCH64_VALID_CALL_TARGET
 	ld1	{v3.16b}, [x0]		// load Xi
 	ld1	{v5.1d}, [x1], #8		// load twisted H
@@ -59,13 +58,13 @@ gcm_gmult_neon:
 
 	mov	x3, #16
 	b	.Lgmult_neon
-.size	gcm_gmult_neon,.-gcm_gmult_neon
+.size	GFp_gcm_gmult_neon,.-GFp_gcm_gmult_neon
 
-.globl	gcm_ghash_neon
-.hidden	gcm_ghash_neon
-.type	gcm_ghash_neon,%function
+.globl	GFp_gcm_ghash_neon
+.hidden	GFp_gcm_ghash_neon
+.type	GFp_gcm_ghash_neon,%function
 .align	4
-gcm_ghash_neon:
+GFp_gcm_ghash_neon:
 	AARCH64_VALID_CALL_TARGET
 	ld1	{v0.16b}, [x0]		// load Xi
 	ld1	{v5.1d}, [x1], #8		// load twisted H
@@ -327,7 +326,7 @@ gcm_ghash_neon:
 	st1	{v0.16b}, [x0]
 
 	ret
-.size	gcm_ghash_neon,.-gcm_ghash_neon
+.size	GFp_gcm_ghash_neon,.-GFp_gcm_ghash_neon
 
 .section	.rodata
 .align	4

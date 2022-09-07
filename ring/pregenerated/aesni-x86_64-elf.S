@@ -8,15 +8,14 @@
 #endif
 
 #if defined(__x86_64__) && !defined(OPENSSL_NO_ASM)
-#include "ring_core_generated/prefix_symbols_asm.h"
 .text	
-.extern	OPENSSL_ia32cap_P
-.hidden OPENSSL_ia32cap_P
-.globl	aes_hw_encrypt
-.hidden aes_hw_encrypt
-.type	aes_hw_encrypt,@function
+.extern	GFp_ia32cap_P
+.hidden GFp_ia32cap_P
+.globl	GFp_aes_hw_encrypt
+.hidden GFp_aes_hw_encrypt
+.type	GFp_aes_hw_encrypt,@function
 .align	16
-aes_hw_encrypt:
+GFp_aes_hw_encrypt:
 .cfi_startproc	
 	movups	(%rdi),%xmm2
 	movl	240(%rdx),%eax
@@ -37,7 +36,7 @@ aes_hw_encrypt:
 	pxor	%xmm2,%xmm2
 	.byte	0xf3,0xc3
 .cfi_endproc	
-.size	aes_hw_encrypt,.-aes_hw_encrypt
+.size	GFp_aes_hw_encrypt,.-GFp_aes_hw_encrypt
 .type	_aesni_encrypt2,@function
 .align	16
 _aesni_encrypt2:
@@ -269,11 +268,11 @@ _aesni_encrypt8:
 	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	_aesni_encrypt8,.-_aesni_encrypt8
-.globl	aes_hw_ctr32_encrypt_blocks
-.hidden aes_hw_ctr32_encrypt_blocks
-.type	aes_hw_ctr32_encrypt_blocks,@function
+.globl	GFp_aes_hw_ctr32_encrypt_blocks
+.hidden GFp_aes_hw_ctr32_encrypt_blocks
+.type	GFp_aes_hw_ctr32_encrypt_blocks,@function
 .align	16
-aes_hw_ctr32_encrypt_blocks:
+GFp_aes_hw_ctr32_encrypt_blocks:
 .cfi_startproc	
 	cmpq	$1,%rdx
 	jne	.Lctr32_bulk
@@ -361,7 +360,7 @@ aes_hw_ctr32_encrypt_blocks:
 	leaq	7(%r8),%r9
 	movl	%r10d,96+12(%rsp)
 	bswapl	%r9d
-	leaq	OPENSSL_ia32cap_P(%rip),%r10
+	leaq	GFp_ia32cap_P(%rip),%r10
 	movl	4(%r10),%r10d
 	xorl	%ebp,%r9d
 	andl	$71303168,%r10d
@@ -849,12 +848,12 @@ aes_hw_ctr32_encrypt_blocks:
 .Lctr32_epilogue:
 	.byte	0xf3,0xc3
 .cfi_endproc	
-.size	aes_hw_ctr32_encrypt_blocks,.-aes_hw_ctr32_encrypt_blocks
-.globl	aes_hw_set_encrypt_key
-.hidden aes_hw_set_encrypt_key
-.type	aes_hw_set_encrypt_key,@function
+.size	GFp_aes_hw_ctr32_encrypt_blocks,.-GFp_aes_hw_ctr32_encrypt_blocks
+.globl	GFp_aes_hw_set_encrypt_key
+.hidden GFp_aes_hw_set_encrypt_key
+.type	GFp_aes_hw_set_encrypt_key,@function
 .align	16
-aes_hw_set_encrypt_key:
+GFp_aes_hw_set_encrypt_key:
 __aesni_set_encrypt_key:
 .cfi_startproc	
 .byte	0x48,0x83,0xEC,0x08
@@ -867,7 +866,7 @@ __aesni_set_encrypt_key:
 
 	movups	(%rdi),%xmm0
 	xorps	%xmm4,%xmm4
-	leaq	OPENSSL_ia32cap_P(%rip),%r10
+	leaq	GFp_ia32cap_P(%rip),%r10
 	movl	4(%r10),%r10d
 	andl	$268437504,%r10d
 	leaq	16(%rdx),%rax
@@ -1086,7 +1085,7 @@ __aesni_set_encrypt_key:
 .cfi_adjust_cfa_offset	-8
 	.byte	0xf3,0xc3
 .cfi_endproc	
-.LSEH_end_set_encrypt_key:
+.LSEH_end_GFp_set_encrypt_key:
 
 .align	16
 .Lkey_expansion_128:
@@ -1156,7 +1155,7 @@ __aesni_set_encrypt_key:
 	shufps	$170,%xmm1,%xmm1
 	xorps	%xmm1,%xmm2
 	.byte	0xf3,0xc3
-.size	aes_hw_set_encrypt_key,.-aes_hw_set_encrypt_key
+.size	GFp_aes_hw_set_encrypt_key,.-GFp_aes_hw_set_encrypt_key
 .size	__aesni_set_encrypt_key,.-__aesni_set_encrypt_key
 .align	64
 .Lbswap_mask:

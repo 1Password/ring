@@ -8,7 +8,6 @@
 #endif
 
 #if defined(__x86_64__) && !defined(OPENSSL_NO_ASM)
-#include "ring_core_generated/prefix_symbols_asm.h"
 .text	
 
 
@@ -574,11 +573,11 @@ L$schedule_mangle_both:
 
 
 
-.globl	_vpaes_set_encrypt_key
-.private_extern _vpaes_set_encrypt_key
+.globl	_GFp_vpaes_set_encrypt_key
+.private_extern _GFp_vpaes_set_encrypt_key
 
 .p2align	4
-_vpaes_set_encrypt_key:
+_GFp_vpaes_set_encrypt_key:
 
 #ifdef BORINGSSL_DISPATCH_TEST
 
@@ -598,11 +597,11 @@ _vpaes_set_encrypt_key:
 
 
 
-.globl	_vpaes_encrypt
-.private_extern _vpaes_encrypt
+.globl	_GFp_vpaes_encrypt
+.private_extern _GFp_vpaes_encrypt
 
 .p2align	4
-_vpaes_encrypt:
+_GFp_vpaes_encrypt:
 
 	movdqu	(%rdi),%xmm0
 	call	_vpaes_preheat
@@ -611,11 +610,11 @@ _vpaes_encrypt:
 	.byte	0xf3,0xc3
 
 
-.globl	_vpaes_ctr32_encrypt_blocks
-.private_extern _vpaes_ctr32_encrypt_blocks
+.globl	_GFp_vpaes_ctr32_encrypt_blocks
+.private_extern _GFp_vpaes_ctr32_encrypt_blocks
 
 .p2align	4
-_vpaes_ctr32_encrypt_blocks:
+_GFp_vpaes_ctr32_encrypt_blocks:
 
 
 	xchgq	%rcx,%rdx

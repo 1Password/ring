@@ -1,7 +1,9 @@
 ; This file is generated from a similarly-named Perl script in the BoringSSL
 ; source tree. Do not edit by hand.
 
-%include "ring_core_generated/prefix_symbols_nasm.inc"
+%ifdef BORINGSSL_PREFIX
+%include "boringssl_prefix_symbols_nasm.inc"
+%endif
 %ifidn __OUTPUT_FORMAT__,obj
 section	code	use32 class=code align=64
 %elifidn __OUTPUT_FORMAT__,win32
@@ -10,10 +12,10 @@ section	.text	code align=64
 %else
 section	.text	code
 %endif
-global	_gcm_init_clmul
+global	_GFp_gcm_init_clmul
 align	16
-_gcm_init_clmul:
-L$_gcm_init_clmul_begin:
+_GFp_gcm_init_clmul:
+L$_GFp_gcm_init_clmul_begin:
 	mov	edx,DWORD [4+esp]
 	mov	eax,DWORD [8+esp]
 	call	L$000pic
@@ -77,10 +79,10 @@ db	102,15,58,68,220,0
 db	102,15,58,15,227,8
 	movdqu	[32+edx],xmm4
 	ret
-global	_gcm_gmult_clmul
+global	_GFp_gcm_gmult_clmul
 align	16
-_gcm_gmult_clmul:
-L$_gcm_gmult_clmul_begin:
+_GFp_gcm_gmult_clmul:
+L$_GFp_gcm_gmult_clmul_begin:
 	mov	eax,DWORD [4+esp]
 	mov	edx,DWORD [8+esp]
 	call	L$001pic
@@ -128,10 +130,10 @@ db	102,15,58,68,220,0
 db	102,15,56,0,197
 	movdqu	[eax],xmm0
 	ret
-global	_gcm_ghash_clmul
+global	_GFp_gcm_ghash_clmul
 align	16
-_gcm_ghash_clmul:
-L$_gcm_ghash_clmul_begin:
+_GFp_gcm_ghash_clmul:
+L$_GFp_gcm_ghash_clmul_begin:
 	push	ebp
 	push	ebx
 	push	esi

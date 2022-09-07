@@ -49,7 +49,7 @@ impl<E: Encoding> Elem<E> {
 impl Elem<T> {
     fn negate(&mut self) {
         unsafe {
-            x25519_fe_neg(self);
+            GFp_x25519_fe_neg(self);
         }
     }
 }
@@ -85,7 +85,8 @@ impl ExtPoint {
     pub fn from_encoded_point_vartime(encoded: &EncodedPoint) -> Result<Self, error::Unspecified> {
         let mut point = Self::new_at_infinity();
 
-        Result::from(unsafe { x25519_ge_frombytes_vartime(&mut point, encoded) }).map(|()| point)
+        Result::from(unsafe { GFp_x25519_ge_frombytes_vartime(&mut point, encoded) })
+            .map(|()| point)
     }
 
     pub fn into_encoded_point(self) -> EncodedPoint {
@@ -125,16 +126,16 @@ fn encode_point(x: Elem<T>, y: Elem<T>, z: Elem<T>) -> EncodedPoint {
 
     let sign_bit: u8 = unsafe {
         let mut recip = Elem::zero();
-        x25519_fe_invert(&mut recip, &z);
+        GFp_x25519_fe_invert(&mut recip, &z);
 
         let mut x_over_z = Elem::zero();
-        x25519_fe_mul_ttt(&mut x_over_z, &x, &recip);
+        GFp_x25519_fe_mul_ttt(&mut x_over_z, &x, &recip);
 
         let mut y_over_z = Elem::zero();
-        x25519_fe_mul_ttt(&mut y_over_z, &y, &recip);
-        x25519_fe_tobytes(&mut bytes, &y_over_z);
+        GFp_x25519_fe_mul_ttt(&mut y_over_z, &y, &recip);
+        GFp_x25519_fe_tobytes(&mut bytes, &y_over_z);
 
-        x25519_fe_isnegative(&x_over_z)
+        GFp_x25519_fe_isnegative(&x_over_z)
     };
 
     // The preceding computations must execute in constant time, but this
@@ -144,11 +145,11 @@ fn encode_point(x: Elem<T>, y: Elem<T>, z: Elem<T>) -> EncodedPoint {
     bytes
 }
 
-prefixed_extern! {
-    fn x25519_fe_invert(out: &mut Elem<T>, z: &Elem<T>);
-    fn x25519_fe_isnegative(elem: &Elem<T>) -> u8;
-    fn x25519_fe_mul_ttt(h: &mut Elem<T>, f: &Elem<T>, g: &Elem<T>);
-    fn x25519_fe_neg(f: &mut Elem<T>);
-    fn x25519_fe_tobytes(bytes: &mut EncodedPoint, elem: &Elem<T>);
-    fn x25519_ge_frombytes_vartime(h: &mut ExtPoint, s: &EncodedPoint) -> bssl::Result;
+extern "C" {
+    fn GFp_x25519_fe_invert(out: &mut Elem<T>, z: &Elem<T>);
+    fn GFp_x25519_fe_isnegative(elem: &Elem<T>) -> u8;
+    fn GFp_x25519_fe_mul_ttt(h: &mut Elem<T>, f: &Elem<T>, g: &Elem<T>);
+    fn GFp_x25519_fe_neg(f: &mut Elem<T>);
+    fn GFp_x25519_fe_tobytes(bytes: &mut EncodedPoint, elem: &Elem<T>);
+    fn GFp_x25519_ge_frombytes_vartime(h: &mut ExtPoint, s: &EncodedPoint) -> bssl::Result;
 }

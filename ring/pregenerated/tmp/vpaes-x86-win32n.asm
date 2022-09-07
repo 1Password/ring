@@ -1,7 +1,9 @@
 ; This file is generated from a similarly-named Perl script in the BoringSSL
 ; source tree. Do not edit by hand.
 
-%include "ring_core_generated/prefix_symbols_nasm.inc"
+%ifdef BORINGSSL_PREFIX
+%include "boringssl_prefix_symbols_nasm.inc"
+%endif
 %ifidn __OUTPUT_FORMAT__,obj
 section	code	use32 class=code align=64
 %elifidn __OUTPUT_FORMAT__,win32
@@ -316,10 +318,10 @@ db	102,15,56,0,217
 	and	ecx,48
 	movdqu	[edx],xmm3
 	ret
-global	_vpaes_set_encrypt_key
+global	_GFp_vpaes_set_encrypt_key
 align	16
-_vpaes_set_encrypt_key:
-L$_vpaes_set_encrypt_key_begin:
+_GFp_vpaes_set_encrypt_key:
+L$_GFp_vpaes_set_encrypt_key_begin:
 	push	ebp
 	push	ebx
 	push	esi
@@ -347,10 +349,10 @@ L$012pic_point:
 	pop	ebx
 	pop	ebp
 	ret
-global	_vpaes_encrypt
+global	_GFp_vpaes_encrypt
 align	16
-_vpaes_encrypt:
-L$_vpaes_encrypt_begin:
+_GFp_vpaes_encrypt:
+L$_GFp_vpaes_encrypt_begin:
 	push	ebp
 	push	ebx
 	push	esi

@@ -25,16 +25,20 @@
 
 #if !defined(OPENSSL_NO_ASM) && defined(__arm__) && !defined(__APPLE__)
 
-#include "ring_core_generated/prefix_symbols_asm.h"
+#if defined(BORINGSSL_PREFIX)
+#include <boringssl_prefix_symbols_asm.h>
+#endif
 
 .fpu neon
 .text
 .align 4
 
-.global x25519_NEON
-.hidden x25519_NEON
-.type x25519_NEON, %function
-x25519_NEON:
+.global GFp_x25519_NEON
+
+.hidden GFp_x25519_NEON
+.type GFp_x25519_NEON, %function
+GFp_x25519_NEON:
+
 vpush {q4,q5,q6,q7}
 mov r12,sp
 sub sp,sp,#736

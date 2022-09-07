@@ -5,11 +5,9 @@ default	rel
 %define XMMWORD
 %define YMMWORD
 %define ZMMWORD
-
-%include "ring_core_generated/prefix_symbols_nasm.inc"
 section	.text code align=64
 
-EXTERN	OPENSSL_ia32cap_P
+EXTERN	GFp_ia32cap_P
 
 chacha20_poly1305_constants:
 
@@ -218,14 +216,14 @@ $L$hash_ad_done:
 
 
 
-global	chacha20_poly1305_open
+global	GFp_chacha20_poly1305_open
 
 ALIGN	64
-chacha20_poly1305_open:
+GFp_chacha20_poly1305_open:
 	mov	QWORD[8+rsp],rdi	;WIN64 prologue
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
-$L$SEH_begin_chacha20_poly1305_open:
+$L$SEH_begin_GFp_chacha20_poly1305_open:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
@@ -272,7 +270,7 @@ $L$SEH_begin_chacha20_poly1305_open:
 	mov	QWORD[((0+160+32))+rbp],r8
 	mov	QWORD[((8+160+32))+rbp],rbx
 
-	mov	eax,DWORD[((OPENSSL_ia32cap_P+8))]
+	mov	eax,DWORD[((GFp_ia32cap_P+8))]
 	and	eax,288
 	xor	eax,288
 	jz	NEAR chacha20_poly1305_open_avx2
@@ -2115,7 +2113,7 @@ $L$open_sse_128_xor_hash:
 	movdqa	xmm6,xmm10
 	movdqa	xmm10,xmm14
 	jmp	NEAR $L$open_sse_128_xor_hash
-$L$SEH_end_chacha20_poly1305_open:
+$L$SEH_end_GFp_chacha20_poly1305_open:
 
 
 
@@ -2123,15 +2121,14 @@ $L$SEH_end_chacha20_poly1305_open:
 
 
 
-
-global	chacha20_poly1305_seal
+global	GFp_chacha20_poly1305_seal
 
 ALIGN	64
-chacha20_poly1305_seal:
+GFp_chacha20_poly1305_seal:
 	mov	QWORD[8+rsp],rdi	;WIN64 prologue
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
-$L$SEH_begin_chacha20_poly1305_seal:
+$L$SEH_begin_GFp_chacha20_poly1305_seal:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
@@ -2179,7 +2176,7 @@ $L$SEH_begin_chacha20_poly1305_seal:
 	mov	QWORD[((8+160+32))+rbp],rbx
 	mov	rbx,rdx
 
-	mov	eax,DWORD[((OPENSSL_ia32cap_P+8))]
+	mov	eax,DWORD[((GFp_ia32cap_P+8))]
 	and	eax,288
 	xor	eax,288
 	jz	NEAR chacha20_poly1305_seal_avx2
@@ -4141,7 +4138,7 @@ DB	102,69,15,58,15,246,4
 	mov	r8,r8
 	call	poly_hash_ad_internal
 	jmp	NEAR $L$seal_sse_128_tail_xor
-$L$SEH_end_chacha20_poly1305_seal:
+$L$SEH_end_GFp_chacha20_poly1305_seal:
 
 
 

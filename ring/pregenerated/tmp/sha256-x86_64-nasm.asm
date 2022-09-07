@@ -5,27 +5,25 @@ default	rel
 %define XMMWORD
 %define YMMWORD
 %define ZMMWORD
-
-%include "ring_core_generated/prefix_symbols_nasm.inc"
 section	.text code align=64
 
 
-EXTERN	OPENSSL_ia32cap_P
-global	sha256_block_data_order
+EXTERN	GFp_ia32cap_P
+global	GFp_sha256_block_data_order
 
 ALIGN	16
-sha256_block_data_order:
+GFp_sha256_block_data_order:
 	mov	QWORD[8+rsp],rdi	;WIN64 prologue
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
-$L$SEH_begin_sha256_block_data_order:
+$L$SEH_begin_GFp_sha256_block_data_order:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
 
 
 
-	lea	r11,[OPENSSL_ia32cap_P]
+	lea	r11,[GFp_ia32cap_P]
 	mov	r9d,DWORD[r11]
 	mov	r10d,DWORD[4+r11]
 	mov	r11d,DWORD[8+r11]
@@ -1743,7 +1741,7 @@ $L$epilogue:
 	mov	rsi,QWORD[16+rsp]
 	DB	0F3h,0C3h		;repret
 
-$L$SEH_end_sha256_block_data_order:
+$L$SEH_end_GFp_sha256_block_data_order:
 ALIGN	64
 
 K256:
@@ -1793,11 +1791,11 @@ DB	32,60,97,112,112,114,111,64,111,112,101,110,115,115,108,46
 DB	111,114,103,62,0
 
 ALIGN	64
-sha256_block_data_order_ssse3:
+GFp_sha256_block_data_order_ssse3:
 	mov	QWORD[8+rsp],rdi	;WIN64 prologue
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
-$L$SEH_begin_sha256_block_data_order_ssse3:
+$L$SEH_begin_GFp_sha256_block_data_order_ssse3:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
@@ -2922,14 +2920,14 @@ $L$epilogue_ssse3:
 	mov	rsi,QWORD[16+rsp]
 	DB	0F3h,0C3h		;repret
 
-$L$SEH_end_sha256_block_data_order_ssse3:
+$L$SEH_end_GFp_sha256_block_data_order_ssse3:
 
 ALIGN	64
-sha256_block_data_order_avx:
+GFp_sha256_block_data_order_avx:
 	mov	QWORD[8+rsp],rdi	;WIN64 prologue
 	mov	QWORD[16+rsp],rsi
 	mov	rax,rsp
-$L$SEH_begin_sha256_block_data_order_avx:
+$L$SEH_begin_GFp_sha256_block_data_order_avx:
 	mov	rdi,rcx
 	mov	rsi,rdx
 	mov	rdx,r8
@@ -4016,7 +4014,7 @@ $L$epilogue_avx:
 	mov	rsi,QWORD[16+rsp]
 	DB	0F3h,0C3h		;repret
 
-$L$SEH_end_sha256_block_data_order_avx:
+$L$SEH_end_GFp_sha256_block_data_order_avx:
 EXTERN	__imp_RtlVirtualUnwind
 
 ALIGN	16
@@ -4115,26 +4113,26 @@ $L$in_prologue:
 
 section	.pdata rdata align=4
 ALIGN	4
-	DD	$L$SEH_begin_sha256_block_data_order wrt ..imagebase
-	DD	$L$SEH_end_sha256_block_data_order wrt ..imagebase
-	DD	$L$SEH_info_sha256_block_data_order wrt ..imagebase
-	DD	$L$SEH_begin_sha256_block_data_order_ssse3 wrt ..imagebase
-	DD	$L$SEH_end_sha256_block_data_order_ssse3 wrt ..imagebase
-	DD	$L$SEH_info_sha256_block_data_order_ssse3 wrt ..imagebase
-	DD	$L$SEH_begin_sha256_block_data_order_avx wrt ..imagebase
-	DD	$L$SEH_end_sha256_block_data_order_avx wrt ..imagebase
-	DD	$L$SEH_info_sha256_block_data_order_avx wrt ..imagebase
+	DD	$L$SEH_begin_GFp_sha256_block_data_order wrt ..imagebase
+	DD	$L$SEH_end_GFp_sha256_block_data_order wrt ..imagebase
+	DD	$L$SEH_info_GFp_sha256_block_data_order wrt ..imagebase
+	DD	$L$SEH_begin_GFp_sha256_block_data_order_ssse3 wrt ..imagebase
+	DD	$L$SEH_end_GFp_sha256_block_data_order_ssse3 wrt ..imagebase
+	DD	$L$SEH_info_GFp_sha256_block_data_order_ssse3 wrt ..imagebase
+	DD	$L$SEH_begin_GFp_sha256_block_data_order_avx wrt ..imagebase
+	DD	$L$SEH_end_GFp_sha256_block_data_order_avx wrt ..imagebase
+	DD	$L$SEH_info_GFp_sha256_block_data_order_avx wrt ..imagebase
 section	.xdata rdata align=8
 ALIGN	8
-$L$SEH_info_sha256_block_data_order:
+$L$SEH_info_GFp_sha256_block_data_order:
 DB	9,0,0,0
 	DD	se_handler wrt ..imagebase
 	DD	$L$prologue wrt ..imagebase,$L$epilogue wrt ..imagebase
-$L$SEH_info_sha256_block_data_order_ssse3:
+$L$SEH_info_GFp_sha256_block_data_order_ssse3:
 DB	9,0,0,0
 	DD	se_handler wrt ..imagebase
 	DD	$L$prologue_ssse3 wrt ..imagebase,$L$epilogue_ssse3 wrt ..imagebase
-$L$SEH_info_sha256_block_data_order_avx:
+$L$SEH_info_GFp_sha256_block_data_order_avx:
 DB	9,0,0,0
 	DD	se_handler wrt ..imagebase
 	DD	$L$prologue_avx wrt ..imagebase,$L$epilogue_avx wrt ..imagebase

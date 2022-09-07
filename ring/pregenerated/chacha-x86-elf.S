@@ -2,14 +2,16 @@
 # source tree. Do not edit by hand.
 
 #if defined(__i386__)
-#include "ring_core_generated/prefix_symbols_asm.h"
+#if defined(BORINGSSL_PREFIX)
+#include <boringssl_prefix_symbols_asm.h>
+#endif
 .text
-.globl	ChaCha20_ctr32
-.hidden	ChaCha20_ctr32
-.type	ChaCha20_ctr32,@function
+.globl	GFp_ChaCha20_ctr32
+.hidden	GFp_ChaCha20_ctr32
+.type	GFp_ChaCha20_ctr32,@function
 .align	16
-ChaCha20_ctr32:
-.L_ChaCha20_ctr32_begin:
+GFp_ChaCha20_ctr32:
+.L_GFp_ChaCha20_ctr32_begin:
 	pushl	%ebp
 	pushl	%ebx
 	pushl	%esi
@@ -20,7 +22,7 @@ ChaCha20_ctr32:
 	call	.Lpic_point
 .Lpic_point:
 	popl	%eax
-	leal	OPENSSL_ia32cap_P-.Lpic_point(%eax),%ebp
+	leal	GFp_ia32cap_P-.Lpic_point(%eax),%ebp
 	testl	$16777216,(%ebp)
 	jz	.L001x86
 	testl	$512,4(%ebp)
@@ -377,7 +379,7 @@ ChaCha20_ctr32:
 	popl	%ebx
 	popl	%ebp
 	ret
-.size	ChaCha20_ctr32,.-.L_ChaCha20_ctr32_begin
+.size	GFp_ChaCha20_ctr32,.-.L_GFp_ChaCha20_ctr32_begin
 .hidden	_ChaCha20_ssse3
 .type	_ChaCha20_ssse3,@function
 .align	16

@@ -8,14 +8,13 @@
 #endif
 
 #if defined(__x86_64__) && !defined(OPENSSL_NO_ASM)
-#include "ring_core_generated/prefix_symbols_asm.h"
 .text	
 
-.globl	_aes_hw_encrypt
-.private_extern _aes_hw_encrypt
+.globl	_GFp_aes_hw_encrypt
+.private_extern _GFp_aes_hw_encrypt
 
 .p2align	4
-_aes_hw_encrypt:
+_GFp_aes_hw_encrypt:
 
 	movups	(%rdi),%xmm2
 	movl	240(%rdx),%eax
@@ -268,11 +267,11 @@ L$enc_loop8_enter:
 	.byte	0xf3,0xc3
 
 
-.globl	_aes_hw_ctr32_encrypt_blocks
-.private_extern _aes_hw_ctr32_encrypt_blocks
+.globl	_GFp_aes_hw_ctr32_encrypt_blocks
+.private_extern _GFp_aes_hw_ctr32_encrypt_blocks
 
 .p2align	4
-_aes_hw_ctr32_encrypt_blocks:
+_GFp_aes_hw_ctr32_encrypt_blocks:
 
 	cmpq	$1,%rdx
 	jne	L$ctr32_bulk
@@ -360,7 +359,7 @@ L$ctr32_bulk:
 	leaq	7(%r8),%r9
 	movl	%r10d,96+12(%rsp)
 	bswapl	%r9d
-	leaq	_OPENSSL_ia32cap_P(%rip),%r10
+	leaq	_GFp_ia32cap_P(%rip),%r10
 	movl	4(%r10),%r10d
 	xorl	%ebp,%r9d
 	andl	$71303168,%r10d
@@ -849,11 +848,11 @@ L$ctr32_epilogue:
 	.byte	0xf3,0xc3
 
 
-.globl	_aes_hw_set_encrypt_key
-.private_extern _aes_hw_set_encrypt_key
+.globl	_GFp_aes_hw_set_encrypt_key
+.private_extern _GFp_aes_hw_set_encrypt_key
 
 .p2align	4
-_aes_hw_set_encrypt_key:
+_GFp_aes_hw_set_encrypt_key:
 __aesni_set_encrypt_key:
 
 .byte	0x48,0x83,0xEC,0x08
@@ -866,7 +865,7 @@ __aesni_set_encrypt_key:
 
 	movups	(%rdi),%xmm0
 	xorps	%xmm4,%xmm4
-	leaq	_OPENSSL_ia32cap_P(%rip),%r10
+	leaq	_GFp_ia32cap_P(%rip),%r10
 	movl	4(%r10),%r10d
 	andl	$268437504,%r10d
 	leaq	16(%rdx),%rax
@@ -1085,7 +1084,7 @@ L$enc_key_ret:
 
 	.byte	0xf3,0xc3
 
-L$SEH_end_set_encrypt_key:
+L$SEH_end_GFp_set_encrypt_key:
 
 .p2align	4
 L$key_expansion_128:

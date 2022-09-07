@@ -8,24 +8,23 @@
 #endif
 
 #if defined(__x86_64__) && !defined(OPENSSL_NO_ASM)
-#include "ring_core_generated/prefix_symbols_asm.h"
 .text	
 
-.extern	OPENSSL_ia32cap_P
-.hidden OPENSSL_ia32cap_P
+.extern	GFp_ia32cap_P
+.hidden GFp_ia32cap_P
 
-.globl	bn_mul_mont_gather5
-.hidden bn_mul_mont_gather5
-.type	bn_mul_mont_gather5,@function
+.globl	GFp_bn_mul_mont_gather5
+.hidden GFp_bn_mul_mont_gather5
+.type	GFp_bn_mul_mont_gather5,@function
 .align	64
-bn_mul_mont_gather5:
+GFp_bn_mul_mont_gather5:
 .cfi_startproc	
 	movl	%r9d,%r9d
 	movq	%rsp,%rax
 .cfi_def_cfa_register	%rax
 	testl	$7,%r9d
 	jnz	.Lmul_enter
-	leaq	OPENSSL_ia32cap_P(%rip),%r11
+	leaq	GFp_ia32cap_P(%rip),%r11
 	movl	8(%r11),%r11d
 	jmp	.Lmul4x_enter
 
@@ -454,7 +453,7 @@ bn_mul_mont_gather5:
 .Lmul_epilogue:
 	.byte	0xf3,0xc3
 .cfi_endproc	
-.size	bn_mul_mont_gather5,.-bn_mul_mont_gather5
+.size	GFp_bn_mul_mont_gather5,.-GFp_bn_mul_mont_gather5
 .type	bn_mul4x_mont_gather5,@function
 .align	32
 bn_mul4x_mont_gather5:
@@ -1088,15 +1087,15 @@ mul4x_internal:
 	jmp	.Lsqr4x_sub_entry
 .cfi_endproc	
 .size	mul4x_internal,.-mul4x_internal
-.globl	bn_power5
-.hidden bn_power5
-.type	bn_power5,@function
+.globl	GFp_bn_power5
+.hidden GFp_bn_power5
+.type	GFp_bn_power5,@function
 .align	32
-bn_power5:
+GFp_bn_power5:
 .cfi_startproc	
 	movq	%rsp,%rax
 .cfi_def_cfa_register	%rax
-	leaq	OPENSSL_ia32cap_P(%rip),%r11
+	leaq	GFp_ia32cap_P(%rip),%r11
 	movl	8(%r11),%r11d
 	andl	$0x80108,%r11d
 	cmpl	$0x80108,%r11d
@@ -1223,14 +1222,14 @@ bn_power5:
 .Lpower5_epilogue:
 	.byte	0xf3,0xc3
 .cfi_endproc	
-.size	bn_power5,.-bn_power5
+.size	GFp_bn_power5,.-GFp_bn_power5
 
-.globl	bn_sqr8x_internal
-.hidden bn_sqr8x_internal
-.hidden	bn_sqr8x_internal
-.type	bn_sqr8x_internal,@function
+.globl	GFp_bn_sqr8x_internal
+.hidden GFp_bn_sqr8x_internal
+.hidden	GFp_bn_sqr8x_internal
+.type	GFp_bn_sqr8x_internal,@function
 .align	32
-bn_sqr8x_internal:
+GFp_bn_sqr8x_internal:
 __bn_sqr8x_internal:
 .cfi_startproc	
 
@@ -2008,7 +2007,7 @@ __bn_sqr8x_reduction:
 	jb	.L8x_reduction_loop
 	.byte	0xf3,0xc3
 .cfi_endproc	
-.size	bn_sqr8x_internal,.-bn_sqr8x_internal
+.size	GFp_bn_sqr8x_internal,.-GFp_bn_sqr8x_internal
 .type	__bn_post4x_internal,@function
 .align	32
 __bn_post4x_internal:
@@ -2065,18 +2064,18 @@ __bn_post4x_internal:
 	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	__bn_post4x_internal,.-__bn_post4x_internal
-.globl	bn_from_montgomery
-.hidden bn_from_montgomery
-.type	bn_from_montgomery,@function
+.globl	GFp_bn_from_montgomery
+.hidden GFp_bn_from_montgomery
+.type	GFp_bn_from_montgomery,@function
 .align	32
-bn_from_montgomery:
+GFp_bn_from_montgomery:
 .cfi_startproc	
 	testl	$7,%r9d
 	jz	bn_from_mont8x
 	xorl	%eax,%eax
 	.byte	0xf3,0xc3
 .cfi_endproc	
-.size	bn_from_montgomery,.-bn_from_montgomery
+.size	GFp_bn_from_montgomery,.-GFp_bn_from_montgomery
 
 .type	bn_from_mont8x,@function
 .align	32
@@ -2192,7 +2191,7 @@ bn_from_mont8x:
 .byte	0x67
 	movq	%rcx,%rbp
 .byte	102,73,15,110,218
-	leaq	OPENSSL_ia32cap_P(%rip),%r11
+	leaq	GFp_ia32cap_P(%rip),%r11
 	movl	8(%r11),%r11d
 	andl	$0x80108,%r11d
 	cmpl	$0x80108,%r11d
@@ -2916,11 +2915,11 @@ bn_powerx5:
 .cfi_endproc	
 .size	bn_powerx5,.-bn_powerx5
 
-.globl	bn_sqrx8x_internal
-.hidden bn_sqrx8x_internal
-.type	bn_sqrx8x_internal,@function
+.globl	GFp_bn_sqrx8x_internal
+.hidden GFp_bn_sqrx8x_internal
+.type	GFp_bn_sqrx8x_internal,@function
 .align	32
-bn_sqrx8x_internal:
+GFp_bn_sqrx8x_internal:
 __bn_sqrx8x_internal:
 .cfi_startproc	
 
@@ -3535,7 +3534,7 @@ __bn_sqrx8x_reduction:
 	jb	.Lsqrx8x_reduction_loop
 	.byte	0xf3,0xc3
 .cfi_endproc	
-.size	bn_sqrx8x_internal,.-bn_sqrx8x_internal
+.size	GFp_bn_sqrx8x_internal,.-GFp_bn_sqrx8x_internal
 .align	32
 .type	__bn_postx4x_internal,@function
 __bn_postx4x_internal:
@@ -3589,11 +3588,11 @@ __bn_postx4x_internal:
 	.byte	0xf3,0xc3
 .cfi_endproc	
 .size	__bn_postx4x_internal,.-__bn_postx4x_internal
-.globl	bn_scatter5
-.hidden bn_scatter5
-.type	bn_scatter5,@function
+.globl	GFp_bn_scatter5
+.hidden GFp_bn_scatter5
+.type	GFp_bn_scatter5,@function
 .align	16
-bn_scatter5:
+GFp_bn_scatter5:
 .cfi_startproc	
 	cmpl	$0,%esi
 	jz	.Lscatter_epilogue
@@ -3608,15 +3607,15 @@ bn_scatter5:
 .Lscatter_epilogue:
 	.byte	0xf3,0xc3
 .cfi_endproc	
-.size	bn_scatter5,.-bn_scatter5
+.size	GFp_bn_scatter5,.-GFp_bn_scatter5
 
-.globl	bn_gather5
-.hidden bn_gather5
-.type	bn_gather5,@function
+.globl	GFp_bn_gather5
+.hidden GFp_bn_gather5
+.type	GFp_bn_gather5,@function
 .align	32
-bn_gather5:
+GFp_bn_gather5:
 .cfi_startproc	
-.LSEH_begin_bn_gather5:
+.LSEH_begin_GFp_bn_gather5:
 
 .byte	0x4c,0x8d,0x14,0x24
 .cfi_def_cfa_register	%r10
@@ -3775,9 +3774,9 @@ bn_gather5:
 	leaq	(%r10),%rsp
 .cfi_def_cfa_register	%rsp
 	.byte	0xf3,0xc3
-.LSEH_end_bn_gather5:
+.LSEH_end_GFp_bn_gather5:
 .cfi_endproc	
-.size	bn_gather5,.-bn_gather5
+.size	GFp_bn_gather5,.-GFp_bn_gather5
 .align	64
 .Linc:
 .long	0,0, 1,1

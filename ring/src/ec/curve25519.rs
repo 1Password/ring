@@ -15,8 +15,6 @@
 //! Elliptic curve operations and schemes using Curve25519.
 
 pub mod ed25519;
-
-#[cfg(not(target_arch = "wasm32"))]
 pub mod x25519;
 
 mod ops;

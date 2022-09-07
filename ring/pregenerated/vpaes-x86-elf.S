@@ -2,7 +2,9 @@
 # source tree. Do not edit by hand.
 
 #if defined(__i386__)
-#include "ring_core_generated/prefix_symbols_asm.h"
+#if defined(BORINGSSL_PREFIX)
+#include <boringssl_prefix_symbols_asm.h>
+#endif
 .text
 .align	64
 .L_vpaes_consts:
@@ -328,12 +330,12 @@ _vpaes_schedule_mangle:
 	movdqu	%xmm3,(%edx)
 	ret
 .size	_vpaes_schedule_mangle,.-_vpaes_schedule_mangle
-.globl	vpaes_set_encrypt_key
-.hidden	vpaes_set_encrypt_key
-.type	vpaes_set_encrypt_key,@function
+.globl	GFp_vpaes_set_encrypt_key
+.hidden	GFp_vpaes_set_encrypt_key
+.type	GFp_vpaes_set_encrypt_key,@function
 .align	16
-vpaes_set_encrypt_key:
-.L_vpaes_set_encrypt_key_begin:
+GFp_vpaes_set_encrypt_key:
+.L_GFp_vpaes_set_encrypt_key_begin:
 	pushl	%ebp
 	pushl	%ebx
 	pushl	%esi
@@ -361,13 +363,13 @@ vpaes_set_encrypt_key:
 	popl	%ebx
 	popl	%ebp
 	ret
-.size	vpaes_set_encrypt_key,.-.L_vpaes_set_encrypt_key_begin
-.globl	vpaes_encrypt
-.hidden	vpaes_encrypt
-.type	vpaes_encrypt,@function
+.size	GFp_vpaes_set_encrypt_key,.-.L_GFp_vpaes_set_encrypt_key_begin
+.globl	GFp_vpaes_encrypt
+.hidden	GFp_vpaes_encrypt
+.type	GFp_vpaes_encrypt,@function
 .align	16
-vpaes_encrypt:
-.L_vpaes_encrypt_begin:
+GFp_vpaes_encrypt:
+.L_GFp_vpaes_encrypt_begin:
 	pushl	%ebp
 	pushl	%ebx
 	pushl	%esi
@@ -391,6 +393,6 @@ vpaes_encrypt:
 	popl	%ebx
 	popl	%ebp
 	ret
-.size	vpaes_encrypt,.-.L_vpaes_encrypt_begin
+.size	GFp_vpaes_encrypt,.-.L_GFp_vpaes_encrypt_begin
 #endif
 .section	.note.GNU-stack,"",@progbits

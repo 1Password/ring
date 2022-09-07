@@ -9,8 +9,7 @@
 #endif
 
 #if !defined(OPENSSL_NO_ASM)
-#include "ring_core_generated/prefix_symbols_asm.h"
-#include <ring-core/arm_arch.h>
+#include <GFp/arm_arch.h>
 
 .section	__TEXT,__const
 
@@ -187,11 +186,11 @@ Lenc_entry:
 	ret
 
 
-.globl	_vpaes_encrypt
-.private_extern	_vpaes_encrypt
+.globl	_GFp_vpaes_encrypt
+.private_extern	_GFp_vpaes_encrypt
 
 .align	4
-_vpaes_encrypt:
+_GFp_vpaes_encrypt:
 	AARCH64_SIGN_LINK_REGISTER
 	stp	x29,x30,[sp,#-16]!
 	add	x29,sp,#0
@@ -662,17 +661,17 @@ _vpaes_schedule_mangle:
 
 Lschedule_mangle_both:
 	tbl	v3.16b, {v3.16b}, v1.16b	// vpshufb	%xmm1,	%xmm3,	%xmm3
-	add	x8, x8, #48			// add	$-16,	%r8
+	add	x8, x8, #64-16			// add	$-16,	%r8
 	and	x8, x8, #~(1<<6)		// and	$0x30,	%r8
 	st1	{v3.2d}, [x2]			// vmovdqu	%xmm3,	(%rdx)
 	ret
 
 
-.globl	_vpaes_set_encrypt_key
-.private_extern	_vpaes_set_encrypt_key
+.globl	_GFp_vpaes_set_encrypt_key
+.private_extern	_GFp_vpaes_set_encrypt_key
 
 .align	4
-_vpaes_set_encrypt_key:
+_GFp_vpaes_set_encrypt_key:
 	AARCH64_SIGN_LINK_REGISTER
 	stp	x29,x30,[sp,#-16]!
 	add	x29,sp,#0
@@ -692,11 +691,11 @@ _vpaes_set_encrypt_key:
 	AARCH64_VALIDATE_LINK_REGISTER
 	ret
 
-.globl	_vpaes_ctr32_encrypt_blocks
-.private_extern	_vpaes_ctr32_encrypt_blocks
+.globl	_GFp_vpaes_ctr32_encrypt_blocks
+.private_extern	_GFp_vpaes_ctr32_encrypt_blocks
 
 .align	4
-_vpaes_ctr32_encrypt_blocks:
+_GFp_vpaes_ctr32_encrypt_blocks:
 	AARCH64_SIGN_LINK_REGISTER
 	stp	x29,x30,[sp,#-16]!
 	add	x29,sp,#0
