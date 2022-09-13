@@ -229,6 +229,13 @@ const ASM_TARGETS: &[AsmTarget] = &[
         asm_extension: "asm",
         preassemble: true,
     },
+    AsmTarget {
+        oss: &[WINDOWS],
+        arch: "aarch64",
+        perlasm_format: "win64",
+        asm_extension: "S",
+        preassemble: true,
+    },
 ];
 
 struct AsmTarget {
@@ -289,27 +296,15 @@ fn read_env_var(name: &'static str) -> Result<String, std::env::VarError> {
 }
 
 fn main() {
-    const RING_PREGENERATE_ASM: &str = "RING_PREGENERATE_ASM";
-    match read_env_var(RING_PREGENERATE_ASM).as_deref() {
-        Ok("1") => {
-            pregenerate_asm_main();
-        }
-        Err(std::env::VarError::NotPresent) => ring_build_rs_main(),
-        _ => {
-            panic!("${} has an invalid value", RING_PREGENERATE_ASM);
-        }
-    }
-}
-
-fn ring_build_rs_main() {
     use std::env;
-
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let out_dir = PathBuf::from(out_dir);
 
     let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
     let os = env::var("CARGO_CFG_TARGET_OS").unwrap();
-    let env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
+    let env = if os == WINDOWS && arch == AARCH64 {
+        String::from("")
+    } else {
+        env::var("CARGO_CFG_TARGET_ENV").unwrap()
+    };
     let (obj_ext, obj_opt) = if env == MSVC {
         (MSVC_OBJ_EXT, MSVC_OBJ_OPT)
     } else {
@@ -330,13 +325,31 @@ fn ring_build_rs_main() {
         is_git,
         is_debug,
     };
+
+    const RING_PREGENERATE_ASM: &str = "RING_PREGENERATE_ASM";
+    match read_env_var(RING_PREGENERATE_ASM).as_deref() {
+        Ok("1") => {
+            pregenerate_asm_main(target);
+        }
+        Err(std::env::VarError::NotPresent) => ring_build_rs_main(target),
+        _ => {
+            panic!("${} has an invalid value", RING_PREGENERATE_ASM);
+        }
+    }
+}
+
+fn ring_build_rs_main(target: Target) {
+    use std::env;
+
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let out_dir = PathBuf::from(out_dir);
     let pregenerated = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join(PREGENERATED);
 
     build_c_code(&target, pregenerated, &out_dir, &ring_core_prefix());
     emit_rerun_if_changed()
 }
 
-fn pregenerate_asm_main() {
+fn pregenerate_asm_main(mut target: Target) {
     println!("cargo:rustc-cfg=pregenerate_asm_only");
 
     let pregenerated = PathBuf::from(PREGENERATED);
@@ -347,6 +360,14 @@ fn pregenerate_asm_main() {
     let mut generated_prefix_headers = false;
 
     for asm_target in ASM_TARGETS {
+        target.arch = asm_target.arch.to_owned();
+
+        // FIXME: On Windows AArch64 we currently must use Clang to compile C code
+        if target.os == WINDOWS && target.arch == AARCH64 {
+            target.env = "".to_owned();
+            target.obj_opt = "-o";
+        }
+
         // For Windows, package pregenerated object files instead of
         // pregenerated assembly language source files, so that the user
         // doesn't need to install the assembler.
@@ -361,12 +382,11 @@ fn pregenerate_asm_main() {
 
         if asm_target.preassemble {
             if !std::mem::replace(&mut generated_prefix_headers, true) {
-                generate_prefix_symbols_nasm(&pregenerated, &ring_core_prefix()).unwrap();
+                generate_prefix_symbols(&pregenerated, &ring_core_prefix()).unwrap();
             }
             let srcs = asm_srcs(perlasm_src_dsts);
             for src in srcs {
-                let obj_path = obj_path(&pregenerated, &src, MSVC_OBJ_EXT);
-                run_command(nasm(&src, asm_target.arch, &obj_path, &pregenerated));
+                compile(&src, &target, true, &pregenerated);
             }
         }
     }
@@ -405,7 +425,7 @@ fn build_c_code(target: &Target, pregenerated: PathBuf, out_dir: &Path, ring_cor
         out_dir
     };
 
-    generate_prefix_symbols(target, out_dir, ring_core_prefix).unwrap();
+    generate_prefix_symbols(out_dir, ring_core_prefix).unwrap();
 
     let asm_srcs = if let Some(asm_target) = asm_target {
         let perlasm_src_dsts = perlasm_src_dsts(asm_dir, asm_target);
@@ -553,6 +573,13 @@ fn cc(
     let is_musl = target.env.starts_with("musl");
 
     let mut c = cc::Build::new();
+
+    // FIXME: On Windows AArch64 we currently must use Clang to compile C code
+    if target.os == WINDOWS && target.arch == AARCH64 && !c.get_compiler().is_like_clang() {
+        let _ = c.compiler("clang");
+        let _ = c.target("aarch64-pc-windows-msvc");
+    }
+
     let _ = c.include("include");
     let _ = c.include(include_dir);
     match ext {
@@ -822,24 +849,18 @@ fn ring_core_prefix() -> String {
 
 /// Creates the necessary header file for symbol renaming and returns the path of the
 /// generated include directory.
-fn generate_prefix_symbols(
-    target: &Target,
-    out_dir: &Path,
-    prefix: &str,
-) -> Result<(), std::io::Error> {
+fn generate_prefix_symbols(out_dir: &Path, prefix: &str) -> Result<(), std::io::Error> {
     generate_prefix_symbols_header(out_dir, "prefix_symbols.h", '#', None, prefix)?;
 
-    if target.os == "windows" {
-        let _ = generate_prefix_symbols_nasm(out_dir, prefix)?;
-    } else {
-        generate_prefix_symbols_header(
-            out_dir,
-            "prefix_symbols_asm.h",
-            '#',
-            Some("#if defined(__APPLE__)"),
-            prefix,
-        )?;
-    }
+    generate_prefix_symbols_nasm(out_dir, prefix)?;
+
+    generate_prefix_symbols_header(
+        out_dir,
+        "prefix_symbols_asm.h",
+        '#',
+        Some("#if defined(__APPLE__)"),
+        prefix,
+    )?;
 
     Ok(())
 }
