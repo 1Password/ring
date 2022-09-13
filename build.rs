@@ -220,6 +220,7 @@ const ASM_TARGETS: &[(&str, Option<&str>, Option<&str>)] = &[
     ("x86_64", None, Some("elf")),
     ("aarch64", Some("ios"), Some("ios64")),
     ("aarch64", Some("macos"), Some("ios64")),
+    ("aarch64", Some(WINDOWS), Some("win64")),
     ("aarch64", None, Some("linux64")),
     ("x86", Some(WINDOWS), Some("win32n")),
     ("x86", Some("ios"), Some("macosx")),
@@ -253,7 +254,12 @@ fn ring_build_rs_main() {
 
     let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
     let os = env::var("CARGO_CFG_TARGET_OS").unwrap();
-    let env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
+    let env = if os == WINDOWS && arch == "aarch64" {
+        String::from("")
+    } else {
+        env::var("CARGO_CFG_TARGET_ENV").unwrap()
+    };
+
     let (obj_ext, obj_opt) = if env == MSVC {
         (MSVC_OBJ_EXT, MSVC_OBJ_OPT)
     } else {
@@ -290,7 +296,7 @@ fn pregenerate_asm_main() {
         // For Windows, package pregenerated object files instead of
         // pregenerated assembly language source files, so that the user
         // doesn't need to install the assembler.
-        let asm_dir = if target_os == Some(WINDOWS) {
+        let asm_dir = if target_os == Some(WINDOWS) && target_arch != "aarch64" {
             &pregenerated_tmp
         } else {
             &pregenerated
@@ -305,7 +311,22 @@ fn pregenerate_asm_main() {
                 let srcs = asm_srcs(perlasm_src_dsts);
                 for src in srcs {
                     let obj_path = obj_path(&pregenerated, &src, MSVC_OBJ_EXT);
-                    run_command(nasm(&src, target_arch, &obj_path));
+
+                    if target_arch == "aarch64" {
+                        let target = Target {
+                            arch: target_arch.to_owned(),
+                            os: WINDOWS.to_owned(),
+                            env: "".to_owned(),
+                            obj_ext: "obj",
+                            obj_opt: "-o",
+                            is_git: false,
+                            is_debug: false,
+                        };
+
+                        run_command(cc(&src, "S", &target, false, &obj_path));
+                    } else {
+                        run_command(nasm(&src, target_arch, &obj_path));
+                    }
                 }
             }
         }
@@ -531,6 +552,12 @@ fn cc(
     let is_musl = target.env.starts_with("musl");
 
     let mut c = cc::Build::new();
+
+    // FIXME: On Windows AArch64 we currently must use Clang to compile C code
+    if target.os == WINDOWS && target.arch == "aarch64" {
+        let _ = c.compiler("clang");
+    }
+
     let _ = c.include("include");
     match ext {
         "c" => {
@@ -675,7 +702,7 @@ fn perlasm_src_dsts(
     let mut src_dsts = srcs
         .iter()
         .filter(|p| is_perlasm(p))
-        .map(|src| (src.clone(), asm_path(out_dir, src, os, perlasm_format)))
+        .map(|src| (src.clone(), asm_path(out_dir, src, arch, os, perlasm_format)))
         .collect::<Vec<_>>();
 
     // Some PerlAsm source files need to be run multiple times with different
@@ -688,7 +715,7 @@ fn perlasm_src_dsts(
                 let synthesized_path = PathBuf::from(synthesized);
                 src_dsts.push((
                     concrete_path,
-                    asm_path(out_dir, &synthesized_path, os, perlasm_format),
+                    asm_path(out_dir, &synthesized_path, arch, os, perlasm_format),
                 ))
             }
         };
@@ -710,11 +737,11 @@ fn is_perlasm(path: &PathBuf) -> bool {
     path.extension().unwrap().to_str().unwrap() == "pl"
 }
 
-fn asm_path(out_dir: &Path, src: &Path, os: Option<&str>, perlasm_format: &str) -> PathBuf {
+fn asm_path(out_dir: &Path, src: &Path, arch: &str, os: Option<&str>, perlasm_format: &str) -> PathBuf {
     let src_stem = src.file_stem().expect("source file without basename");
 
     let dst_stem = src_stem.to_str().unwrap();
-    let dst_extension = if os == Some("windows") { "asm" } else { "S" };
+    let dst_extension = if os == Some("windows") && arch != "aarch64" { "asm" } else { "S" };
     let dst_filename = format!("{}-{}.{}", dst_stem, perlasm_format, dst_extension);
     out_dir.join(dst_filename)
 }

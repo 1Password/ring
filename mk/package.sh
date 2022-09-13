@@ -9,6 +9,10 @@ if [[ $(git status --porcelain | wc -c) -ne 0 ]]; then
   exit 1
 fi
 
+# Required by `cc`
+export OPT_LEVEL="3"
+export TARGET="aarch64-pc-windows-msvc"
+
 (cd pregenerate_asm && cargo clean && cargo build)
 ./pregenerate_asm/target/debug/pregenerate_asm
 cargo package --allow-dirty
