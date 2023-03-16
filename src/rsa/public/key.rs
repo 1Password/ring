@@ -3,6 +3,7 @@ use crate::{
     arithmetic::{bigint, montgomery::Unencoded},
     bits, cpu, error,
     limb::LIMB_BYTES,
+    rsa::public::components::Components,
 };
 use alloc::boxed::Box;
 
@@ -16,7 +17,7 @@ pub struct Key {
 impl Key {
     /// Constructs a `Key` from its components.
     pub fn try_from_components<B>(
-        components: &super::Components<B>,
+        components: &Components<B>,
         bounds: &dyn Bounds,
     ) -> Result<Self, error::KeyRejected>
     where
@@ -98,6 +99,15 @@ impl Key {
 
         // Step 3.
         Ok(fill_be_bytes_n(m, n_bits, out_buffer))
+    }
+}
+
+impl Into<Components<Box<[u8]>>> for Key {
+    fn into(self) -> Components<Box<[u8]>> {
+        Components {
+            n: self.n().to_be_bytes(),
+            e: self.e().to_be_bytes(),
+        }
     }
 }
 

@@ -28,6 +28,9 @@ use crate::{
 };
 use core::convert::TryFrom;
 
+#[cfg(feature = "alloc")]
+use alloc::boxed::Box;
+
 // Keep in sync with the documentation comment for `KeyPair`.
 const PRIVATE_KEY_PUBLIC_MODULUS_MAX_BITS: bits::BitLength = bits::BitLength::from_usize_bits(4096);
 
@@ -35,6 +38,12 @@ const PRIVATE_KEY_PUBLIC_MODULUS_MAX_BITS: bits::BitLength = bits::BitLength::fr
 pub struct RsaKeyPair {
     p: PrivatePrime<P>,
     q: PrivatePrime<Q>,
+    // Note: it's possible to compute `d` whenever needed instead of storing a copy in this struct,
+    // since `d = e^-1 mod (p-1)(q-1)`. The modular inverse of `e` can be computed via the Extended Euclidean Algorithm.
+    // We don't do this for two reasons:
+    // 1. The algorithm is O(log(min(a, b))). Would provide a private-prime-derived value as input to a non-constant-time operation.
+    // 2. The algorithm requires supporting element division (currently no corresponding `LIMBS_*` function).
+    d: bigint::Nonnegative,
     qInv: bigint::Elem<P, R>,
     qq: bigint::Modulus<QQ>,
     q_mod_n: bigint::Elem<N, R>,
@@ -223,6 +232,7 @@ impl RsaKeyPair {
         Ok(Self {
             p,
             q,
+            d,
             qInv,
             q_mod_n,
             qq,
@@ -233,6 +243,29 @@ impl RsaKeyPair {
     /// Returns a reference to the public key.
     pub fn public(&self) -> &public::Key {
         &self.public
+    }
+
+    /// Export components of public and private key material.
+    ///
+    /// # Warning
+    ///
+    /// Components contain private key material.
+    /// This should be used with caution.
+    #[cfg(feature = "alloc")]
+    pub fn less_safe_into_components(&self) -> Components<Box<[u8]>, Box<[u8]>> {
+        Components {
+            public_key: self.public.clone().into(),
+            d: self.d.to_be_bytes(),
+            p: self.p.less_safe_modulus_to_be_bytes(),
+            q: self.q.less_safe_modulus_to_be_bytes(),
+            dP: self.p.less_safe_exponent_to_be_bytes(),
+            dQ: self.q.less_safe_exponent_to_be_bytes(),
+            qInv: self
+                .qInv
+                .clone()
+                .into_unencoded(&self.p.modulus)
+                .to_be_bytes(),
+        }
     }
 }
 
@@ -320,6 +353,14 @@ impl<M: Prime + Clone> PrivatePrime<M> {
             modulus: p,
             exponent: dP,
         })
+    }
+
+    pub(crate) fn less_safe_modulus_to_be_bytes(&self) -> Box<[u8]> {
+        self.modulus.to_be_bytes()
+    }
+
+    pub(crate) fn less_safe_exponent_to_be_bytes(&self) -> Box<[u8]> {
+        self.exponent.to_be_bytes()
     }
 }
 

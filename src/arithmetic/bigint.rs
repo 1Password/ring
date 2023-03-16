@@ -221,12 +221,11 @@ pub struct Modulus<M> {
     oneRR: One<M, RR>,
 }
 
-impl<M: PublicModulus> Modulus<M> {
+// Does not use trait bound `M: PublicModulus` to offer private key material serialization
+// for use cases like JWK creation.
+impl<M> Modulus<M> {
     pub fn to_be_bytes(&self) -> Box<[u8]> {
-        let mut padded = vec![0u8; self.limbs.len() * LIMB_BYTES];
-        // See Falko Strenzke, "Manger's Attack revisited", ICICS 2010.
-        limb::big_endian_from_limbs(&self.limbs, &mut padded);
-        strip_leading_zeros(&padded)
+        big_endian_from_limbs_padded(&self.limbs)
     }
 }
 
@@ -423,6 +422,10 @@ impl<M, E> Elem<M, E> {
     #[inline]
     pub fn is_zero(&self) -> bool {
         self.limbs.is_zero()
+    }
+
+    pub fn to_be_bytes(&self) -> Box<[u8]> {
+        big_endian_from_limbs_padded(&self.limbs)
     }
 }
 
@@ -818,6 +821,10 @@ impl<M> PrivateExponent<M> {
 
         Ok(Self { limbs: dP })
     }
+
+    pub(crate) fn to_be_bytes(&self) -> Box<[u8]> {
+        big_endian_from_limbs_padded(&self.limbs)
+    }
 }
 
 impl<M: Prime> PrivateExponent<M> {
@@ -1165,6 +1172,10 @@ impl Nonnegative {
         Ok((Self { limbs }, r_bits))
     }
 
+    pub(crate) fn to_be_bytes(&self) -> Box<[u8]> {
+        big_endian_from_limbs_padded(&self.limbs)
+    }
+
     #[inline]
     pub fn is_odd(&self) -> bool {
         limb::limbs_are_even_constant_time(&self.limbs) != LimbMask::True
@@ -1430,6 +1441,13 @@ fn strip_leading_zeros(value: &[u8]) -> Box<[u8]> {
     (&value[index_after_zeros(value)..]).into()
 }
 
+fn big_endian_from_limbs_padded(limbs: &[Limb]) -> Box<[u8]> {
+    let mut padded = vec![0u8; limbs.len() * LIMB_BYTES];
+    // See Falko Strenzke, "Manger's Attack revisited", ICICS 2010.
+    limb::big_endian_from_limbs(&limbs, &mut padded);
+    strip_leading_zeros(&padded)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1581,6 +1599,14 @@ mod tests {
             PublicExponent::from_be_bytes(untrusted::Input::from(&[0x1, 0x00, 0x01]), 65537)
                 .unwrap();
         assert_eq!("65537", format!("{:?}", exponent));
+    }
+
+    #[test]
+    fn test_public_exponent_byte_serialization() {
+        let bytes = [0x1, 0x00, 0x01];
+        let exponent =
+            PublicExponent::from_be_bytes(untrusted::Input::from(&bytes), 65537).unwrap();
+        assert_eq!(*exponent.to_be_bytes(), bytes);
     }
 
     fn consume_elem<M>(

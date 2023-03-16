@@ -53,6 +53,72 @@ fn rsa_from_pkcs8_test() {
 
 #[cfg(feature = "alloc")]
 #[test]
+fn rsa_component_export() {
+    use std::ops::Deref;
+
+    test::run(
+        test_file!("rsa_from_pkcs8_tests.txt"),
+        |section, test_case| {
+            assert_eq!(section, "");
+
+            let input = test_case.consume_bytes("Input");
+            let error = test_case.consume_optional_string("Error");
+
+            match (ring::rsa::RsaKeyPair::from_pkcs8(&input), error) {
+                (Ok(keypair), None) => {
+                    let keypair_components = keypair.less_safe_into_components();
+                    let equivalent_keypair =
+                        ring::rsa::RsaKeyPair::try_from(&keypair_components).unwrap();
+
+                    assert_eq!(
+                        keypair.public().e().to_be_bytes(),
+                        equivalent_keypair.public().e().to_be_bytes()
+                    );
+
+                    assert_eq!(
+                        keypair.public().n().to_be_bytes(),
+                        equivalent_keypair.public().n().to_be_bytes()
+                    );
+
+                    const PLAINTEXT: &[u8] = b"hardcoded secret!";
+                    let encoding = &ring::rsa::RSA_OAEP_2048_8192_SHA256;
+                    let public_key = keypair.public();
+                    let encrypted = public_key
+                        .encrypt_oaep_bytes_less_safe(
+                            encoding,
+                            PLAINTEXT,
+                            &ring::rand::SystemRandom::new(),
+                        )
+                        .unwrap();
+
+                    assert!(encrypted.deref().as_ref() != PLAINTEXT);
+
+                    let expected_decrypt_result = keypair
+                        .decrypt_oaep_bytes_less_safe(encoding, &encrypted)
+                        .unwrap();
+
+                    assert_eq!(expected_decrypt_result.deref().as_ref(), PLAINTEXT);
+
+                    // Decryption equivalence implies private key material was exported correctly
+                    assert_eq!(
+                        expected_decrypt_result,
+                        equivalent_keypair
+                            .decrypt_oaep_bytes_less_safe(encoding, &encrypted)
+                            .unwrap(),
+                    );
+                }
+                (Err(e), None) => panic!("Failed with error \"{}\", but expected to succeed", e),
+                (Ok(_), Some(e)) => panic!("Succeeded, but expected error \"{}\"", e),
+                (Err(actual), Some(expected)) => assert_eq!(format!("{}", actual), expected),
+            };
+
+            Ok(())
+        },
+    );
+}
+
+#[cfg(feature = "alloc")]
+#[test]
 fn test_signature_rsa_pkcs1_sign() {
     fn run(test_file: test::File) {
         let rng = rand::SystemRandom::new();

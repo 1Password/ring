@@ -672,8 +672,8 @@ fn cc(
 
 fn nasm(file: &Path, arch: &str, out_file: &Path, include_dir: &Path) -> Command {
     let oformat = match arch {
-        "x86_64" => ("win64"),
-        "x86" => ("win32"),
+        "x86_64" => "win64",
+        "x86" => "win32",
         _ => panic!("unsupported arch: {}", arch),
     };
 

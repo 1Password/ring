@@ -237,7 +237,7 @@ mod sysrand_chunk {
 mod sysrand_chunk {
     use crate::error;
     use js_sys::Reflect;
-    use wasm_bindgen::{JsValue, JsCast};
+    use wasm_bindgen::{JsCast, JsValue};
     use web_sys::Crypto;
 
     /**
@@ -248,7 +248,8 @@ mod sysrand_chunk {
     fn get_crypto() -> Result<Crypto, error::Unspecified> {
         Reflect::get(&js_sys::global(), &JsValue::from("crypto"))
             .map_err(|_| error::Unspecified)?
-            .dyn_into::<Crypto>().map_err(|_| error::Unspecified)
+            .dyn_into::<Crypto>()
+            .map_err(|_| error::Unspecified)
     }
 
     pub fn chunk(mut dest: &mut [u8]) -> Result<usize, error::Unspecified> {
