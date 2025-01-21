@@ -101,8 +101,8 @@ pub(crate) mod sealed {
 }
 
 /// A type that can be returned by `ring::rand::generate()`.
-pub trait RandomlyConstructable: self::sealed::RandomlyConstructable {}
-impl<T> RandomlyConstructable for T where T: self::sealed::RandomlyConstructable {}
+pub trait RandomlyConstructable: sealed::RandomlyConstructable {}
+impl<T> RandomlyConstructable for T where T: sealed::RandomlyConstructable {}
 
 /// A secure random number generator where the random values come directly
 /// from the operating system.
@@ -277,7 +277,7 @@ mod sysrand_chunk {
     pub fn chunk(dest: &mut [u8]) -> Result<usize, error::Unspecified> {
         use winapi::shared::wtypesbase::ULONG;
 
-        assert!(core::mem::size_of::<usize>() >= core::mem::size_of::<ULONG>());
+        assert!(size_of::<usize>() >= size_of::<ULONG>());
         let len = core::cmp::min(dest.len(), polyfill::usize_from_u32(ULONG::max_value()));
         let result = unsafe {
             winapi::um::ntsecapi::RtlGenRandom(
