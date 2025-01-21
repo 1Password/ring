@@ -54,11 +54,11 @@ macro_rules! define_endian {
 
 macro_rules! impl_from_byte_array {
     ($endian:ident, $base:ident, $elems:expr) => {
-        impl FromByteArray<[u8; $elems * core::mem::size_of::<$base>()]>
+        impl FromByteArray<[u8; $elems * size_of::<$base>()]>
             for [$endian<$base>; $elems]
         {
             #[inline]
-            fn from_byte_array(a: &[u8; $elems * core::mem::size_of::<$base>()]) -> Self {
+            fn from_byte_array(a: &[u8; $elems * size_of::<$base>()]) -> Self {
                 unsafe { core::mem::transmute_copy(a) }
             }
         }
@@ -67,13 +67,13 @@ macro_rules! impl_from_byte_array {
 
 macro_rules! impl_array_encoding {
     ($endian:ident, $base:ident, $elems:expr) => {
-        impl ArrayEncoding<[u8; $elems * core::mem::size_of::<$base>()]>
+        impl ArrayEncoding<[u8; $elems * size_of::<$base>()]>
             for [$endian<$base>; $elems]
         {
             #[inline]
-            fn as_byte_array(&self) -> &[u8; $elems * core::mem::size_of::<$base>()] {
+            fn as_byte_array(&self) -> &[u8; $elems * size_of::<$base>()] {
                 let as_bytes_ptr =
-                    self.as_ptr() as *const [u8; $elems * core::mem::size_of::<$base>()];
+                    self.as_ptr() as *const [u8; $elems * size_of::<$base>()];
                 unsafe { &*as_bytes_ptr }
             }
         }
