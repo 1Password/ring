@@ -233,12 +233,12 @@ mod sysrand_chunk {
     target_vendor = "unknown",
     target_os = "unknown",
     target_env = "",
-    not(feature = "andi"),
+    not(feature = "custom_rand"),
 ))]
 mod sysrand_chunk {
     use crate::error;
     use js_sys::Reflect;
-    use wasm_bindgen::{JsValue, JsCast};
+    use wasm_bindgen::{JsCast, JsValue};
     use web_sys::Crypto;
 
     /**
@@ -249,7 +249,8 @@ mod sysrand_chunk {
     fn get_crypto() -> Result<Crypto, error::Unspecified> {
         Reflect::get(&js_sys::global(), &JsValue::from("crypto"))
             .map_err(|_| error::Unspecified)?
-            .dyn_into::<Crypto>().map_err(|_| error::Unspecified)
+            .dyn_into::<Crypto>()
+            .map_err(|_| error::Unspecified)
     }
 
     pub fn chunk(mut dest: &mut [u8]) -> Result<usize, error::Unspecified> {
@@ -270,13 +271,42 @@ mod sysrand_chunk {
     }
 }
 
-#[cfg(feature = "andi")]
+/// Macro to register a custom random fill function. Similar to the in op-random.
+#[cfg(feature = "custom_rand")]
+#[macro_export]
+macro_rules! register_custom_random_fill {
+    ($path:path) => {
+        const _: () = {
+            #[unsafe(no_mangle)]
+            unsafe extern "Rust" fn __op_custom_random_fill(dest: &mut [u8]) -> u32 {
+                // Make sure the passed function has the type we expect
+                type F = fn(&mut [u8]) -> ::core::result::Result<(), ()>;
+                let f: F = $path;
+                match f(dest) {
+                    Ok(()) => 0,
+                    Err(()) => 1,
+                }
+            }
+        };
+    };
+}
+#[cfg(feature = "custom_rand")]
 mod sysrand_chunk {
     use crate::error;
 
     pub fn chunk(mut dest: &mut [u8]) -> Result<usize, error::Unspecified> {
-        // The getrandom crate is used in the latest version of ring, and has WASI P1 support: https://github.com/briansmith/ring/blob/522afb658067bed0512a49f66bd4c07389b51ab3/src/rand.rs#L168
-        getrandom::getrandom(dest).map_err(|_| error::Unspecified)
+        unsafe extern "Rust" {
+            fn __op_custom_random_fill(dest: &mut [u8]) -> u32;
+        }
+
+        // SAFETY: This call is safe as long as the custom implementation supplied to the
+        // macro above is safe and controlled by us. The `__op_` prefix helps in preventing
+        // other crates from injecting a different random fill implementation.
+        let ret = unsafe { __op_custom_random_fill(dest) };
+        match ret {
+            0 => Ok(dest.len()),
+            _ => Err(error::Unspecified),
+        }
     }
 }
 
