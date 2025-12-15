@@ -269,6 +269,21 @@ mod sysrand_chunk {
     }
 }
 
+#[cfg(all(
+    target_arch = "wasm32",
+    target_vendor = "unknown",
+    target_os = "wasi",
+    target_env = "p1",
+))]
+mod sysrand_chunk {
+    use crate::error;
+
+    pub fn chunk(mut dest: &mut [u8]) -> Result<usize, error::Unspecified> {
+        // The getrandom crate is used in the latest version of ring, and has WASI P1 support: https://github.com/briansmith/ring/blob/522afb658067bed0512a49f66bd4c07389b51ab3/src/rand.rs#L168
+        getrandom::getrandom(dest).map_err(|_| error::Unspecified)
+    }
+}
+
 #[cfg(windows)]
 mod sysrand_chunk {
     use crate::{error, polyfill};
