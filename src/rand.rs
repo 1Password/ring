@@ -233,6 +233,7 @@ mod sysrand_chunk {
     target_vendor = "unknown",
     target_os = "unknown",
     target_env = "",
+    not(feature = "andi"),
 ))]
 mod sysrand_chunk {
     use crate::error;
@@ -269,12 +270,7 @@ mod sysrand_chunk {
     }
 }
 
-#[cfg(all(
-    target_arch = "wasm32",
-    target_vendor = "unknown",
-    target_os = "wasi",
-    target_env = "p1",
-))]
+#[cfg(feature = "andi")]
 mod sysrand_chunk {
     use crate::error;
 
