@@ -163,13 +163,18 @@ impl sealed::SecureRandom for SystemRandom {
 
 impl crate::sealed::Sealed for SystemRandom {}
 
-#[cfg(any(
-    all(
-        any(target_os = "android", target_os = "linux"),
-        not(feature = "dev_urandom_fallback")
+#[cfg(all(feature = "getrandom", target_arch = "wasm32"))]
+use self::getrandom::fill as fill_impl;
+#[cfg(all(
+    any(
+        all(
+            any(target_os = "android", target_os = "linux"),
+            not(feature = "dev_urandom_fallback")
+        ),
+        target_arch = "wasm32",
+        windows
     ),
-    target_arch = "wasm32",
-    windows
+    not(feature = "getrandom")
 ))]
 use self::sysrand::fill as fill_impl;
 
@@ -233,7 +238,6 @@ mod sysrand_chunk {
     target_vendor = "unknown",
     target_os = "unknown",
     target_env = "",
-    not(feature = "custom_rand"),
 ))]
 mod sysrand_chunk {
     use crate::error;
@@ -271,45 +275,6 @@ mod sysrand_chunk {
     }
 }
 
-/// Macro to register a custom random fill function. Similar to the in op-random.
-#[cfg(feature = "custom_rand")]
-#[macro_export]
-macro_rules! register_custom_random_fill {
-    ($path:path) => {
-        const _: () = {
-            #[unsafe(no_mangle)]
-            unsafe extern "Rust" fn __op_custom_random_fill(dest: &mut [u8]) -> u32 {
-                // Make sure the passed function has the type we expect
-                type F = fn(&mut [u8]) -> ::core::result::Result<(), ()>;
-                let f: F = $path;
-                match f(dest) {
-                    Ok(()) => 0,
-                    Err(()) => 1,
-                }
-            }
-        };
-    };
-}
-#[cfg(feature = "custom_rand")]
-mod sysrand_chunk {
-    use crate::error;
-
-    pub fn chunk(mut dest: &mut [u8]) -> Result<usize, error::Unspecified> {
-        unsafe extern "Rust" {
-            fn __op_custom_random_fill(dest: &mut [u8]) -> u32;
-        }
-
-        // SAFETY: This call is safe as long as the custom implementation supplied to the
-        // macro above is safe and controlled by us. The `__op_` prefix helps in preventing
-        // other crates from injecting a different random fill implementation.
-        let ret = unsafe { __op_custom_random_fill(dest) };
-        match ret {
-            0 => Ok(dest.len()),
-            _ => Err(error::Unspecified),
-        }
-    }
-}
-
 #[cfg(windows)]
 mod sysrand_chunk {
     use crate::{error, polyfill};
@@ -334,11 +299,14 @@ mod sysrand_chunk {
     }
 }
 
-#[cfg(any(
-    target_os = "android",
-    target_os = "linux",
-    target_arch = "wasm32",
-    windows
+#[cfg(all(
+    any(
+        target_os = "android",
+        target_os = "linux",
+        target_arch = "wasm32",
+        windows
+    ),
+    not(feature = "getrandom")
 ))]
 mod sysrand {
     use super::sysrand_chunk::chunk;
@@ -351,6 +319,15 @@ mod sysrand {
             read_len += chunk_len;
         }
         Ok(())
+    }
+}
+
+#[cfg(all(feature = "getrandom", target_arch = "wasm32"))]
+mod getrandom {
+    use crate::error;
+
+    pub fn fill(dest: &mut [u8]) -> Result<(), error::Unspecified> {
+        getrandom::fill(dest).map_err(|_| error::Unspecified)
     }
 }
 
