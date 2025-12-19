@@ -124,8 +124,7 @@ impl SystemRandom {
 // system's) CSPRNG. Avoid using it on targets where it uses the `rdrand`
 // implementation.
 #[cfg(any(
-    all(feature = "less-safe-getrandom-custom-or-rdrand", target_os = "none"),
-    all(feature = "less-safe-getrandom-espidf", target_os = "espidf"),
+    feature = "less-safe-getrandom-custom-wasm-hostruntime",
     target_os = "aix",
     target_os = "android",
     target_os = "dragonfly",

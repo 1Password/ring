@@ -362,6 +362,7 @@ cc = { version = "1.0.66", default-features = false }
 default = ["alloc", "dev_urandom_fallback"]
 alloc = []
 dev_urandom_fallback = ["once_cell"]
+less-safe-getrandom-custom-wasm-hostruntime = []
 internal_benches = []
 slow_tests = []
 std = ["alloc"]
