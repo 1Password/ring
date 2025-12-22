@@ -328,6 +328,7 @@ name = "ring"
 
 [dependencies]
 untrusted = { version = "0.7.1" }
+getrandom = { version = "0.2.10" }
 
 [target.'cfg(any(target_arch = "x86",target_arch = "x86_64", all(any(target_arch = "aarch64", target_arch = "arm"), any(target_os = "android", target_os = "fuchsia", target_os = "linux", target_os = "windows"))))'.dependencies]
 spin = { version = "0.9.2", default-features = false, features = ["once"] }
@@ -361,11 +362,13 @@ cc = { version = "1.0.66", default-features = false }
 default = ["alloc", "dev_urandom_fallback"]
 alloc = []
 dev_urandom_fallback = ["once_cell"]
+less-safe-getrandom-custom-wasm-hostruntime = []
 internal_benches = []
 slow_tests = []
 std = ["alloc"]
 test_logging = []
 wasm32_c = []
+wasm32_unknown_unknown_js = ["getrandom/js"]
 
 # XXX: debug = false because of https://github.com/rust-lang/rust/issues/34122
 

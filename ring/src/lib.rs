@@ -125,4 +125,5 @@ mod sealed {
     // impl sealed::Sealed for MyType {}
     // ```
     pub trait Sealed {}
+    pub struct Arg;
 }

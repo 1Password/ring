@@ -406,6 +406,9 @@ path = "tests/rsa_tests.rs"
 name = "signature_tests"
 path = "tests/signature_tests.rs"
 
+[dependencies.getrandom]
+version = "0.2.10"
+
 [dependencies.untrusted]
 version = "0.7.1"
 
@@ -421,10 +424,12 @@ default = [
 ]
 dev_urandom_fallback = ["once_cell"]
 internal_benches = []
+less-safe-getrandom-custom-wasm-hostruntime = []
 slow_tests = []
 std = ["alloc"]
 test_logging = []
 wasm32_c = []
+wasm32_unknown_unknown_js = ["getrandom/js"]
 
 [target.'cfg(all(target_arch = "wasm32", target_vendor = "unknown", target_os = "unknown", target_env = ""))'.dependencies.js-sys]
 version = "0.3.51"
