@@ -141,6 +141,7 @@ impl EphemeralPrivateKey {
         self.algorithm
     }
 
+    /// Less safe access to the private key bytes.
     #[cfg(test)]
     pub fn bytes(&self) -> &[u8] {
         self.private_key.bytes_less_safe()
